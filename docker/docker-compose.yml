@@ -1,0 +1,65 @@
+
+# 下記サイトを参考にしました。
+# https://tech.recruit-mp.co.jp/infrastructure/post-11266/
+
+version: "2"
+services:
+
+  busybox:
+    container_name: ${CONTAINER_PREFIX}_data
+    image: busybox:latest
+    volumes:
+      - ./busybox/mysql:/var/lib/mysql
+      - ./busybox/wordpress/wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./busybox/wordpress/wp-content/themes:/var/www/html/wp-content/themes
+      - ./busybox/wordpress/wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./busybox/phpmyadmin:/sessions
+      - ./busybox/apache/log:/var/log/apache
+
+  mysql:
+    container_name: ${CONTAINER_PREFIX}_db
+    image: mysql:latest
+    env_file: .env
+    volumes_from:
+      - busybox
+    # volumes:
+    #   - ./mysql/${MYSQL_DUMP}:/docker-entrypoint-initdb.d/install_wordpress.sql
+
+  wordpress:
+    container_name: ${CONTAINER_PREFIX}_wp
+    # ビルドするカスタム Wordpress イメージの名前
+    image: ${CONTAINER_PREFIX}_wp
+    build:
+      context: ./wordpress
+      args:
+        - WORDPRESS_IMAGE_VERSION=${WORDPRESS_IMAGE_VERSION}
+    ports:
+      - "${WORDPRESS_PORT}:80"
+    depends_on:
+      - mysql
+    env_file: .env
+    environment:
+      WORDPRESS_DB_HOST: "mysql:3306"
+    volumes_from:
+      - busybox
+    volumes:
+      # バージョン確認用
+      - ./apache/phpinfo.php:/var/www/html/phpinfo.php
+      # テーマをマウントする
+      - ../dist:/var/www/html/wp-content/themes/${MY_THEME_FOLDER}
+      - ./apache/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+    restart: always
+
+  phpmyadmin:
+    container_name: ${CONTAINER_PREFIX}_pma
+    depends_on:
+      - mysql
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "${PHPMYADMIN_PORT}:80"
+    volumes_from:
+      - busybox
+
