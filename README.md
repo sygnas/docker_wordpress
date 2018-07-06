@@ -40,7 +40,7 @@ MY_THEME_FOLDER=my_theme
 
 ### コンテナの構築
 
-`.env` を編集したら docker-compose でコンテナを構築する。
+`.env` を編集したら docker-compose でコンテナを構築する。
 
 ```
 $ cd docker
@@ -67,7 +67,7 @@ WORDPRESS_TITLE=test
 
 ### プラグインの設定
 
-`my-docker/docker_wordpress/docker/wordpress/wp-install.sh` を編集して、必要なプラグインを追加する。
+`my-docker/docker_wordpress/docker/wordpress/wp-install.sh` を編集して、必要なプラグインを追加する。
 
 下記のスクリプトでは `jetpack-markdown` をインストールして、有効にしている。
 
