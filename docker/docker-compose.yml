@@ -18,7 +18,7 @@ services:
 
   mysql:
     container_name: ${CONTAINER_PREFIX}_db
-    image: mysql:latest
+    image: mysql:5.7.22
     env_file: .env
     volumes_from:
       - busybox
